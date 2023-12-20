@@ -54,7 +54,7 @@ public:
         return hasReset_;
     }
 
-    const Point& position() const {
+    const Point position() const {
         return position_;
     }
 
@@ -86,7 +86,9 @@ int main() {
 
         if ( isnumber(schematic.read(p)) )
         {
+            Point anchor = p;
             
+
         }
 
         grid.advance();
