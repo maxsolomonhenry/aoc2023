@@ -70,20 +70,25 @@ private:
 int main() {
 
     std::vector<std::string> lines;
+
     readFile("input/3.txt", lines);
+    Schematic schematic(lines);
 
     int nWidth = lines[0].size();
     int nHeight = lines.size();
 
     Grid grid(nWidth, nHeight);
-    Schematic schematic(lines);
 
     // Look for numbers, extract.
     while (!grid.hasReset())
     {
         const Point& p = grid.position();
 
-        std::cout << p << ": " << schematic.read(p) << "\n";
+        if ( isnumber(schematic.read(p)) )
+        {
+            
+        }
+
         grid.advance();
     }
     
