@@ -15,6 +15,18 @@ std::ostream& operator<<(std::ostream& os, const Point& point) {
     return os;
 }
 
+class Schematic {
+public:
+    Schematic(std::vector<std::string> data) : data_(data) {}
+
+    const char read(Point p) const {
+        return data_[p.y][p.x];
+    }
+
+private:
+    std::vector<std::string> data_;
+};
+
 class Grid {
 public:
     Grid(int width, int height) : width_(width), height_(height) {
@@ -38,7 +50,7 @@ public:
         }
     }
 
-    const bool& hasReset() const {
+    const bool hasReset() const {
         return hasReset_;
     }
 
@@ -64,11 +76,14 @@ int main() {
     int nHeight = lines.size();
 
     Grid grid(nWidth, nHeight);
+    Schematic schematic(lines);
 
     // Look for numbers, extract.
     while (!grid.hasReset())
     {
-        std::cout << grid.position() << "\n";
+        const Point& p = grid.position();
+
+        std::cout << p << ": " << schematic.read(p) << "\n";
         grid.advance();
     }
     
