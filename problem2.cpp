@@ -23,12 +23,12 @@ std::vector<std::string> parseByDelimiter(const std::string& line, const char& d
     return output;
 }
 
-int parseGameNo(std::string game) {
+int parseGameNo(std::string& game) {
     game.erase(0, game.find(' '));
     return std::stoi(game.substr(0, game.find(':')));
 }
 
-bool isValidGame(std::vector<std::string> handfuls, std::map<std::string, int> limits) {
+bool isValidGame(const std::vector<std::string>& handfuls, std::map<std::string, int>& limits) {
 
     int numCubes;
 
