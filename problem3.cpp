@@ -5,96 +5,108 @@
 #include "util.h"
 
 
-struct Point {
-    int x = 0;
-    int y = 0;
-};
+bool isSymbol(const char& c) {
 
-std::ostream& operator<<(std::ostream& os, const Point& point) {
-    os << "(" << point.x << ", " << point.y << ")";
-    return os;
+    if (std::isdigit(c))
+        return false;
+    
+    if (c == '.')
+        return false;
+
+    if (c == '\0')
+        return false;
+
+    return true;
+
 }
 
-class Schematic {
-public:
-    Schematic(std::vector<std::string> data) : data_(data) {}
+bool hasAdjacentSymbol(std::string value, int x, int y, std::vector<std::string> lines) {
 
-    const char read(Point p) const {
-        return data_[p.y][p.x];
+    int pX;
+    int pY;
+    int right;
+
+    if (x == 0)
+    {
+        // If it is first item on next line.
+        pX = lines[0].size() - (value.size() + 1);
+        pY = y - 2;
+        right = value.size();
+    } else if (x == value.size()){
+        // Up against the leftmost edge.
+        pX = x - value.size();
+        pY = y - 1;
+        right = value.size();
+    } else {
+        pX = x - (value.size() + 1);
+        pY = y - 1;
+        right = value.size() + 1;
     }
 
-private:
-    std::vector<std::string> data_;
-};
-
-class Grid {
-public:
-    Grid(int width, int height) : width_(width), height_(height) {
-        position_ = {0, 0};
-        hasReset_ = false;
-    }
-
-    void advance() {
-        ++position_.x;
-
-        if (position_.x >= width_)
+    // Check top row.
+    if (pY >= 0)
+    {
+        for (int i = 0; i <= right; ++i)
         {
-            position_.x = 0;
-            ++position_.y;
-        }
-
-        if (position_.y >= height_)
-        {
-            position_.y = 0;
-            hasReset_ = true;
+            if (isSymbol(lines[pY][pX + i]))
+                return true;
         }
     }
 
-    const bool hasReset() const {
-        return hasReset_;
+    // Check middle row.
+    if (isSymbol(lines[pY + 1][pX]))
+        return true;
+
+    if (isSymbol(lines[pY + 1][pX + right]))
+        return true;
+    
+    // Check bottom row.
+    if (pY <= lines.size())
+    {
+        for (int i = 0; i <= right; ++i)
+        {
+            if (isSymbol(lines[pY + 2][pX + i]))
+                return true;
+        }
     }
 
-    const Point position() const {
-        return position_;
-    }
-
-private:
-    int width_;
-    int height_;
-
-    Point position_;
-
-    bool hasReset_;
-};
+    return false;
+}
 
 int main() {
 
     std::vector<std::string> lines;
 
     readFile("input/3.txt", lines);
-    Schematic schematic(lines);
 
-    int nWidth = lines[0].size();
-    int nHeight = lines.size();
+    int height = lines.size();
+    int width = lines[0].size();
+    int sum = 0;
 
-    Grid grid(nWidth, nHeight);
-
-    // Look for numbers, extract.
-    while (!grid.hasReset())
+    std::string value;
+    for (int y = 0; y <= height; ++y)
     {
-        const Point& p = grid.position();
-
-        if ( isnumber(schematic.read(p)) )
+        for (int x = 0; x <= width; ++x)
         {
-            Point anchor = p;
-            
+            char& c = lines[y][x];
+            if (!std::isdigit(c))
+            {
+                if (!value.empty())
+                {
+                    if (hasAdjacentSymbol(value, x, y, lines))
+                    {
+                        sum += std::stoi(value);
+                    }
 
+                    value.clear();
+                }
+                continue;
+            }
+            value.push_back(c);
         }
-
-        grid.advance();
     }
-    
-    // See if symbol around said numbers. 
+
+    std::cout << "Total sum: " << sum << "\n";
 
     return 0;
 }
