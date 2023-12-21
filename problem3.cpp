@@ -4,7 +4,6 @@
 #include <vector>
 #include "util.h"
 
-
 bool isSymbol(const char& c) {
 
     if (std::isdigit(c))
@@ -20,58 +19,50 @@ bool isSymbol(const char& c) {
 
 }
 
-bool hasAdjacentSymbol(std::string value, int x, int y, std::vector<std::string> lines) {
 
-    int pX;
-    int pY;
-    int right;
+bool boundingBoxHasSymbol (std::string partNumber, int width, int height, int x, int y, std::vector<std::string> lines) {
+    // Get start position of word.
 
-    if (x == 0)
+    int xStart;
+    int yStart;
+
+    int xUpperLeft;
+    int yUpperLeft;
+
+    int xLowerRight;
+    int yLowerRight;
+
+    int nDigits = partNumber.size();
+
+    if (x != 0)
     {
-        // If it is first item on next line.
-        pX = lines[0].size() - (value.size() + 1);
-        pY = y - 2;
-        right = value.size();
-    } else if (x == value.size()){
-        // Up against the leftmost edge.
-        pX = x - value.size();
-        pY = y - 1;
-        right = value.size();
+        xStart = x - nDigits;
+        yStart = y;
     } else {
-        pX = x - (value.size() + 1);
-        pY = y - 1;
-        right = value.size() + 1;
+        xStart = width - nDigits;
+        yStart = y - 1;
     }
 
-    // Check top row.
-    if (pY >= 0)
-    {
-        for (int i = 0; i <= right; ++i)
-        {
-            if (isSymbol(lines[pY][pX + i]))
-                return true;
-        }
-    }
+    // Determine squishy bounding box.
+    xUpperLeft = std::max(xStart - 1, 0);
+    yUpperLeft = std::max(yStart - 1, 0);
 
-    // Check middle row.
-    if (isSymbol(lines[pY + 1][pX]))
-        return true;
+    xLowerRight = std::min(xStart + nDigits, (width - 1));
+    yLowerRight = std::min(yStart + 1, (height - 1));
 
-    if (isSymbol(lines[pY + 1][pX + right]))
-        return true;
-    
-    // Check bottom row.
-    if (pY <= lines.size())
+    // Check for symbols.
+    for (int i = yUpperLeft; i <= yLowerRight; ++i)
     {
-        for (int i = 0; i <= right; ++i)
+        for (int j = xUpperLeft; j <= xLowerRight; ++j)
         {
-            if (isSymbol(lines[pY + 2][pX + i]))
+            if (isSymbol(lines[i][j]))
                 return true;
         }
     }
 
     return false;
 }
+
 
 int main() {
 
@@ -83,26 +74,27 @@ int main() {
     int width = lines[0].size();
     int sum = 0;
 
-    std::string value;
-    for (int y = 0; y <= height; ++y)
+    std::string partNumber;
+    for (int y = 0; y < height; ++y)
     {
-        for (int x = 0; x <= width; ++x)
+        for (int x = 0; x < width; ++x)
         {
             char& c = lines[y][x];
             if (!std::isdigit(c))
             {
-                if (!value.empty())
+                if (!partNumber.empty())
                 {
-                    if (hasAdjacentSymbol(value, x, y, lines))
+                    
+                    if (boundingBoxHasSymbol (partNumber, width, height, x, y, lines))
                     {
-                        sum += std::stoi(value);
+                        sum += std::stoi(partNumber);
                     }
 
-                    value.clear();
+                    partNumber.clear();
                 }
                 continue;
             }
-            value.push_back(c);
+            partNumber.push_back(c);
         }
     }
 
