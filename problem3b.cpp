@@ -89,7 +89,7 @@ int main () {
 
     int sum = 0;
     for (int y = 0; y < lines.size(); ++y)
-        for (int x = 0; x < lines[0].size(); ++x)
+        for (int x = 0; x < lines[y].size(); ++x)
             if (lines[y][x] == '*')
                 sum += computeGearRatio(x, y, lines);
 
