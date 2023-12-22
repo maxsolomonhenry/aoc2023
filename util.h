@@ -6,6 +6,23 @@
 #include <iostream>
 #include <sstream>
 
+std::vector<std::string> parseByDelimiter(const std::string& line, const char& d) {
+
+    std::istringstream iss(line);
+    
+    std::vector<std::string> output;
+    std::string element;
+
+    while (std::getline(iss, element, d))
+    {
+        if (element.empty())
+            continue;
+
+        output.push_back(element);
+    }
+
+    return output;
+}
 
 bool readFile(const std::string& fpath, std::vector<std::string>& lines)
 {
