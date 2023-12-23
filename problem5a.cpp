@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -13,6 +14,10 @@ std::vector<long> parseSeeds (std::string line) {
         seeds.push_back(std::stol(info[i]));
 
     return seeds;
+}
+
+long seed2location(long seed) {
+    return 0;
 }
 
 int main() {
@@ -57,5 +62,12 @@ int main() {
     // Push back last map (TODO: better way to do this?).
     maps.push_back(map);
 
+    std::vector<long> locations;
+    for (long seed : seeds)
+        locations.push_back(seed2location(seed));
+
+    long min = *std::min_element(locations.begin(), locations.end());
+
+    std::cout << "Min value: " << min << "\n";
     return 0;
 }
