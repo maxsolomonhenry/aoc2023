@@ -5,9 +5,8 @@
 #include "util.h"
 
 std::vector<long> parseSeeds (std::string line) {
-    std::vector<std::string> info;
 
-    info = parseByDelimiter(line, ' ');
+    auto info = parseByDelimiter(line, ' ');
 
     std::vector<long> seeds;
     for (int i = 1; i < info.size(); ++i)
@@ -16,10 +15,10 @@ std::vector<long> parseSeeds (std::string line) {
     return seeds;
 }
 
-long findClosetLowerKey(const std::map<long, long>& map, long query) {
+long findClosestLowerKey(const std::map<long, long>& map, long query) {
     
     long key = -1;
-    for (auto pair : map)
+    for (const auto& pair : map)
     {
         if (pair.first > query)
             return key;
@@ -35,8 +34,7 @@ long seed2location(long seed, std::vector<std::map<long, long>> maps) {
     long query = seed;
     for (auto& map : maps)
     {
-        // Find lower key closest to seed.
-        long key = findClosetLowerKey(map, query);
+        long key = findClosestLowerKey(map, query);
         long offset = map[key];
         query += offset;
     }
@@ -54,8 +52,8 @@ int main() {
     std::map<long, long> map;
     map[0] = 0;
 
-    for (int i = 2; i < lines.size(); ++i) {
-
+    for (int i = 2; i < lines.size(); ++i) 
+    {
         if (lines[i].empty())
         {
             maps.push_back(map);
@@ -85,7 +83,7 @@ int main() {
 
     }
 
-    // Push back last map (TODO: better way to do this?).
+    // Push back last map.
     maps.push_back(map);
 
     std::vector<long> locations;
