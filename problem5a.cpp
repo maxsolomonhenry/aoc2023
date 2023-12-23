@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <string>
-#include <unordered_map>
+#include <map>
 #include <vector>
 #include "util.h"
 
@@ -16,21 +16,52 @@ std::vector<long> parseSeeds (std::string line) {
     return seeds;
 }
 
-long seed2location(long seed) {
-    return 0;
+long findClosetLowerKey(const std::map<long, long>& map, long query) {
+    
+    long key = -1;
+    for (auto pair : map)
+    {
+        if (pair.first > query)
+            return key;
+
+        key = pair.first;
+    }
+
+    return key;
+}
+
+long seed2location(long seed, std::vector<std::map<long, long>> maps) {
+
+    long query = seed;
+    for (auto& map : maps)
+    {
+        // Find lower key closest to seed.
+        long key = findClosetLowerKey(map, query);
+        long offset = map[key];
+        query += offset;
+    }
+
+    return query;
 }
 
 int main() {
     std::vector<std::string> lines;
     readFile("input/5.txt", lines);
 
-    std::vector<std::unordered_map<int, int>> maps;
+    std::vector<std::map<long, long>> maps;
     std::vector<long> seeds = parseSeeds(lines[0]);
 
-    std::unordered_map<int, int> map;
+    std::map<long, long> map;
+    map[0] = 0;
 
     for (int i = 2; i < lines.size(); ++i) {
-        map[0] = 0;
+
+        if (lines[i].empty())
+        {
+            maps.push_back(map);
+            map.clear();
+            map[0] = 0;
+        }
 
         // Ignore "X-to-Y map:" lines...
         if (!std::isdigit(lines[i][0]))
@@ -49,13 +80,8 @@ int main() {
         map[source] = offset;
 
         // Set the offset to 0 above the specified range.
-        map[source + range] = 0;
-        
-        if (lines[i].empty())
-        {
-            maps.push_back(map);
-            map.clear();
-        }
+        if (map.find(source + range) == map.end())
+            map[source + range] = 0;
 
     }
 
@@ -64,7 +90,7 @@ int main() {
 
     std::vector<long> locations;
     for (long seed : seeds)
-        locations.push_back(seed2location(seed));
+        locations.push_back(seed2location(seed, maps));
 
     long min = *std::min_element(locations.begin(), locations.end());
 
