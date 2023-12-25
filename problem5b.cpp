@@ -4,15 +4,33 @@
 #include <vector>
 #include "util.h"
 
-std::vector<long> parseSeeds (std::string line) {
+std::vector<std::pair<long, long>> parseSeedInfo (std::string line) {
 
     auto info = parseByDelimiter(line, ' ');
 
-    std::vector<long> seeds;
-    for (int i = 1; i < info.size(); ++i)
-        seeds.push_back(std::stol(info[i]));
+    std::vector<std::pair<long, long>> seedInfo;
 
-    return seeds;
+    for (int i = 1; i < info.size(); i += 2)
+    {
+        std::pair<long, long> seed(
+            std::stol(info[i]), 
+            std::stol(info[i + 1])
+        );
+
+        seedInfo.push_back(seed);
+    }
+
+    return seedInfo;
+}
+
+bool inRange(long seed, const std::vector<std::pair<long, long>>& seedInfo)
+{
+    for (auto pair : seedInfo)
+    {
+        if ((seed >= pair.first) && (seed < pair.first + pair.second))
+            return true;
+    }
+    return false;
 }
 
 long findClosestLowerKey(const std::map<long, long>& map, long query) {
@@ -29,9 +47,9 @@ long findClosestLowerKey(const std::map<long, long>& map, long query) {
     return key;
 }
 
-long location2seed(long seed, std::vector<std::map<long, long>> maps) {
+long location2seed(long location, std::vector<std::map<long, long>> maps) {
 
-    long query = seed;
+    long query = location;
     for (auto& map : maps)
     {
         long key = findClosestLowerKey(map, query);
@@ -47,8 +65,6 @@ int main() {
     readFile("input/5.txt", lines);
 
     std::vector<std::map<long, long>> maps;
-    std::vector<long> seeds = parseSeeds(lines[0]);
-
     std::map<long, long> map;
     map[0] = 0;
 
@@ -86,12 +102,35 @@ int main() {
     // Push back last map.
     maps.push_back(map);
 
-    std::vector<long> locations;
-    for (long seed : seeds)
-        locations.push_back(location2seed(seed, maps));
+    auto seedInfo = parseSeedInfo(lines[0]);
 
-    long min = *std::min_element(locations.begin(), locations.end());
+    // Reverse it.
+    std::vector<std::map<long, long>> backwardsMaps;
+    for (auto it = maps.rbegin(); it != maps.rend(); ++it)
+    {
+        std::map<long, long> reversed;
+        for (auto pair : *it)
+        {
+            long key = pair.first + pair.second;
+            long value = -pair.second;
+            reversed[key] = value;
+        }
 
-    std::cout << "Min value: " << min << "\n";
+        backwardsMaps.push_back(reversed);
+    }
+
+    long i = 0;
+    int seed;
+    while (true)
+    {
+        seed = location2seed(i++, backwardsMaps);
+        std::cout << seed << "\n";
+
+        if (inRange(seed, seedInfo))
+            break;
+    }
+
+    std::cout << "Lowest seed: " << seed << "\n";
+
     return 0;
 }
